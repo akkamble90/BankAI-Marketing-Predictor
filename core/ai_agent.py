@@ -29,13 +29,14 @@ class BankingAIAgent:
         Sends processed model data to Groq (Llama 3.3) to generate 
         strategic banking insights.
         """
+        # We ensure the data being passed in is converted to strings to avoid type errors
         prompt = f"""
         You are an expert Banking Marketing Consultant. 
         
         Analysis of current campaign:
-        - Sector Performance Breakdown: {summary_stats}
-        - Top 5 Factors driving 'YES' (Successful Subscriptions): {top_pos}
-        - Top 5 Factors driving 'NO' (Rejection/Failure): {top_neg}
+        - Sector Performance Breakdown: {str(summary_stats)}
+        - Top 5 Factors driving 'YES' (Successful Subscriptions): {str(top_pos)}
+        - Top 5 Factors driving 'NO' (Rejection/Failure): {str(top_neg)}
         
         Please provide a detailed Strategic Report:
         1. STRATEGIC ANALYSIS: Explain WHY the top 5 positive factors are causing high customer engagement.
@@ -47,16 +48,22 @@ class BankingAIAgent:
         """
         
         try:
+            # We define the messages as a standard list of dicts. 
+            # This avoids the "unhashable type: 'dict'" error often caused by f-string confusion.
+            messages = [
+                {"role": "system", "content": "You are a professional banking strategist and marketing expert."},
+                {"role": "user", "content": prompt}
+            ]
+
             response = self.client.chat.completions.create(
                 model="llama-3.3-70b-versatile", 
-                messages=[
-                    {{"role": "system", "content": "You are a professional banking strategist and marketing expert."}},
-                    {{"role": "user", "content": prompt}},
-                ],
+                messages=messages,
                 temperature=0.7,
                 max_tokens=1024
             )
+            
             return response.choices[0].message.content
             
         except Exception as e:
+            # Returning the error message to be displayed in the Streamlit UI info box
             return f"🤖 AI Agent Error: {str(e)}"
