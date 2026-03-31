@@ -2,7 +2,7 @@
 
 An End-to-End Machine Learning pipeline that predicts bank subscription likelihood using a **Stacking Ensemble (XGBoost + Random Forest)** and provides strategic business insights via a **Groq-powered AI Agent**.
 
-## 🚀 Features
+## 🚀 Features 
 - **Stacking Classifier:** High-precision prediction of customer behavior.
 - **AI Strategy Agent:** Uses Llama 3.3 (via Groq) to provide policy recommendations.
 - **Interactive Dashboard:** Streamlit UI with Plotly visualizations.
