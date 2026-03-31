@@ -41,7 +41,7 @@ jobs:
         fi
 
     - name: Archive Production Artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: trained-bank-model
         path: |
