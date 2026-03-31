@@ -1,0 +1,17 @@
+# Credentials
+.env
+
+# Environments
+venv/
+.venv/
+env/
+
+# Data & Large Files (Keep your repo clean)
+data/*.csv
+models/*.pkl
+logs/*.log
+
+# Python System files
+__pycache__/
+*.pyc
+.DS_Store

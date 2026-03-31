@@ -1,0 +1,49 @@
+name: Bank Marketing ML Pipeline
+
+# Trigger the workflow on push or pull request to the main branch
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  train-and-verify:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Run Training Pipeline
+      run: |
+        # This executes the Target Encoding, SMOTE, Optuna, and Stacking
+        python main.py
+
+    - name: Verify Model Generation
+      run: |
+        # Check if the model files were created successfully
+        if [ -f "models/stack_model.pkl" ] && [ -f "models/encoder.pkl" ]; then
+          echo "Model and Encoder successfully generated."
+        else
+          echo "Model training failed: Files not found."
+          exit 1
+        fi
+
+    - name: Archive Production Artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: trained-bank-model
+        path: |
+          models/stack_model.pkl
+          models/encoder.pkl
