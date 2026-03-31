@@ -6,9 +6,8 @@ venv/
 .venv/
 env/
 
-# Data & Large Files (Keep your repo clean)
+#data
 data/*.csv
-models/*.pkl
 logs/*.log
 
 # Python System files
