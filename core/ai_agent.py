@@ -2,18 +2,22 @@ import os
 from openai import OpenAI
 from dotenv import load_dotenv
 
-# 1. Initialize environment variables
-load_dotenv()
-
 class BankingAIAgent:
     def __init__(self):
         """
-        Initializes the Groq client using the OpenAI-compatible SDK.
-        Ensures the API key is present before attempting connection.
+        Initializes the Groq client.
+        Checks Streamlit Secrets/System Environment first, then falls back to .env
         """
-        api_key = os.getenv("GROQ_API_KEY") 
+        # 1. Try to get key from System Environment (Streamlit Secrets)
+        api_key = os.environ.get("GROQ_API_KEY")
+        
+        # 2. If not found, try loading from .env (Local development)
         if not api_key:
-            raise ValueError("❌ Error: GROQ_API_KEY not found in .env file!")
+            load_dotenv()
+            api_key = os.getenv("GROQ_API_KEY")
+
+        if not api_key:
+            raise ValueError("❌ Error: GROQ_API_KEY not found! Set it in Streamlit Secrets or a .env file.")
 
         self.client = OpenAI(
             base_url="https://api.groq.com/openai/v1",
@@ -25,7 +29,6 @@ class BankingAIAgent:
         Sends processed model data to Groq (Llama 3.3) to generate 
         strategic banking insights.
         """
-        # Proper indentation of the prompt string
         prompt = f"""
         You are an expert Banking Marketing Consultant. 
         
@@ -44,18 +47,16 @@ class BankingAIAgent:
         """
         
         try:
-            # Using Llama 3.3 70B via Groq for high-quality reasoning
             response = self.client.chat.completions.create(
                 model="llama-3.3-70b-versatile", 
                 messages=[
-                    {"role": "system", "content": "You are a professional banking strategist and marketing expert."},
-                    {"role": "user", "content": prompt},
+                    {{"role": "system", "content": "You are a professional banking strategist and marketing expert."}},
+                    {{"role": "user", "content": prompt}},
                 ],
-                temperature=0.7, # Adds a balance of creativity and factual consistency
+                temperature=0.7,
                 max_tokens=1024
             )
             return response.choices[0].message.content
             
         except Exception as e:
-            # Returning the error message to be displayed in the Streamlit UI
             return f"🤖 AI Agent Error: {str(e)}"
