@@ -22,6 +22,9 @@ if "show_recovery" not in st.session_state:
     st.session_state["show_recovery"] = False
 if "current_report" not in st.session_state:
     st.session_state["current_report"] = None
+# This persists the data after predictions so buttons don't cause a crash
+if "predicted_df" not in st.session_state:
+    st.session_state["predicted_df"] = None
 
 # --- 2. LOGGING ---
 os.makedirs('logs', exist_ok=True)
@@ -39,9 +42,8 @@ def create_pdf(report_text):
     
     c.setFont("Helvetica", 10)
     textobject = c.beginText(100, 720)
-    # Simple line wrapping for the PDF
     for line in report_text.split('\n'):
-        textobject.textLine(line[:100]) # Basic wrap to avoid bleeding off page
+        textobject.textLine(line[:100]) 
     c.drawText(textobject)
     
     c.showPage()
@@ -98,6 +100,8 @@ if check_password():
         
         if st.button("Logout"):
             st.session_state["password_correct"] = False
+            st.session_state["predicted_df"] = None
+            st.session_state["current_report"] = None
             st.rerun()
 
     st.title("🏦 BankAI Policy Dashboard")
@@ -125,9 +129,11 @@ if check_password():
                 # 3. PREDICTIONS
                 preds = model.predict(X_encoded)
                 df['Prediction'] = ['Likely YES' if p == 1 else 'Unlikely NO' for p in preds]
+                
+                # Store in session state so it survives the download button rerun
+                st.session_state["predicted_df"] = df
 
                 # 4. EXTRACT TOP 10 INFLUENTIAL FEATURES
-                # Using the XGBoost component from the Stacking Ensemble
                 xgb_model = model.named_estimators_['xgb']
                 feat_importance_df = pd.DataFrame({
                     'Feature': X_encoded.columns,
@@ -154,35 +160,35 @@ if check_password():
                 st.header("🤖 AI Strategic Insights")
                 
                 with st.spinner("AI Agent is generating report based on your model's findings..."):
-                    # Find poorly performing sectors for the AI to analyze
                     low_perf_dict = df[df['Prediction'] == 'Unlikely NO']['job'].value_counts().head(3).to_dict()
-                    
                     agent = BankingAIAgent()
                     ai_report = agent.get_marketing_insights(low_perf_dict, top_10_factors)
-                    
                     st.markdown(ai_report)
                     st.session_state['current_report'] = ai_report
 
             except Exception as e:
                 st.error(f"⚠️ Error during analysis: {str(e)}")
 
-        # --- DOWNLOAD & LEADS SECTION ---
-        if st.session_state['current_report']:
+        # --- DOWNLOAD & LEADS SECTION (Using Session State) ---
+        if st.session_state["predicted_df"] is not None:
+            # We work with the saved dataframe to avoid KeyError
+            res_df = st.session_state["predicted_df"]
+            
             st.divider()
             col_a, col_b = st.columns([1, 1])
             
             with col_a:
-                pdf_fp = create_pdf(st.session_state['current_report'])
-                st.download_button(
-                    label="📄 Download AI Report as PDF",
-                    data=pdf_fp,
-                    file_name="BankAI_Strategy_Report.pdf",
-                    mime="application/pdf"
-                )
+                if st.session_state['current_report']:
+                    pdf_fp = create_pdf(st.session_state['current_report'])
+                    st.download_button(
+                        label="📄 Download AI Report as PDF",
+                        data=pdf_fp,
+                        file_name="BankAI_Strategy_Report.pdf",
+                        mime="application/pdf"
+                    )
             
             with col_b:
-                # Allow user to download the predictions as CSV
-                csv = df.to_csv(index=False).encode('utf-8')
+                csv = res_df.to_csv(index=False).encode('utf-8')
                 st.download_button(
                     label="📥 Download Full Predictions CSV",
                     data=csv,
@@ -191,4 +197,5 @@ if check_password():
                 )
 
             st.subheader("Targeted Leads (Top 20 Probable Subscribers)")
-            st.dataframe(df[df['Prediction'] == 'Likely YES'].head(20))
+            # Safely filter the persisted dataframe
+            st.dataframe(res_df[res_df['Prediction'] == 'Likely YES'].head(20))
