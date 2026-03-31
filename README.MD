@@ -2,11 +2,11 @@
 
 An End-to-End Machine Learning pipeline that predicts bank subscription likelihood using a **Stacking Ensemble (XGBoost + Random Forest)** and provides strategic business insights via a **Groq-powered AI Agent**. BankAI is a comprehensive machine learning and Generative AI solution designed to optimize bank telemarketing campaigns. By combining a high-performance Stacking Ensemble with a Llama 3.3 Strategic Agent, this project transforms raw customer data into prioritized lead lists and executive-level business intelligence.
 
-Technical Architecture & Data Science Workflow
+# Technical Architecture & Workflow
 
 1. Data Preprocessing & Feature Engineering
 
-To achieve high model stability, the following steps were taken:
+# To achieve high model stability, the following steps were taken:
 
 * Dimensionality Reduction: Removed seasonal noise features such as month and day to ensure the model focuses on customer financial health and demographics rather than call timing.
 * Target Encoding: Leveraged category_encoders to transform high-cardinality categorical features such as job and education into numerical values based on their statistical relationship with the target variable.
@@ -30,45 +30,45 @@ AI Strategic Agent (Groq + Llama 3.3)
 
 After the model identifies who will subscribe, the Banking AI Agent explains why and how to close the deal.
 
-Strategic Insights Discovered:
+# Strategic Insights Discovered:
 
 * Debt Impact: The model identified housing loans as the primary negative driver. Customers with significant existing debt are statistically 25% less likely to commit to new term deposits.
 * The Loyalty Loop: Previous successful interactions (poutcome) were the strongest predictors of future success, suggesting a quality over quantity approach for the sales team.
 
-Rectifying AI Hallucinations:
+# Rectifying AI Hallucinations:
 
-To ensure factual accuracy in a sensitive banking environment:
+# To ensure factual accuracy in a sensitive banking environment:
 
 * Context Injection: A strict prompt engineering template injects real-time summary statistics and feature importance rankings directly into the LLM.
 * Persona Grounding: The agent is locked into a Professional Banking Strategist role and instructed to only provide insights derived from the uploaded dataset.
 * Deterministic Controls: Temperature is set to 0.7 to allow for tactical creativity in sales scripts while maintaining factual consistency in the data report.
 
-Installation & Deployment
+# Installation & Deployment
 
 1. Clone the Repository
 
-git clone https://github.com/akkamble90/BankAI-Marketing-Predictor.git
+* git clone https://github.com/akkamble90/BankAI-Marketing-Predictor.git
 
 2. Install Dependencies
 
-pip install -r requirements.txt
+* pip install -r requirements.txt
 
 3. Setup Environment
 
-Create a .env file or add the following to Streamlit Secrets:
+* Create a .env file or add the following to Streamlit Secrets:
 
-GROQ_API_KEY = "your_key_here"
+* GROQ_API_KEY = "your_key_here"
 
 4. Run the App
 
-streamlit run app.py
+* streamlit run app.py
 
-Future Roadmap
+# Future Roadmap
 
 * SHAP Integration: Add individual-level local explanations for every customer prediction.
 * Real-time Retraining: Allow users to trigger a new Optuna study directly from the UI.
 * LFS Implementation: Move large model binaries to Git Large File Storage for cleaner version control.
 
-Dataset Credits
+# Dataset Credits
 
 This project utilizes the UCI Bank Marketing Dataset, which contains results of phone-based marketing campaigns by a Portuguese banking institution.
